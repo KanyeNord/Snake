@@ -10,8 +10,14 @@
 .mela{
 	-fx-background-color: rgb(255, 0, 0);
 }
-.serpente{
+.serpenteChiaro{
 	-fx-background-color: rgb(0, 0, 255);
+}
+.serpenteScuro{
+	-fx-background-color: rgb(0, 0, 150);
+}
+.serpente{
+	-fx-background-color: rgb(100, 0, 150);
 }
 #titolo {
 	-fx-font-size:70;
