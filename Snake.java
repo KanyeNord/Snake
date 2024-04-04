@@ -38,6 +38,7 @@ public class Snake extends Application {
 	Boolean mele[][] = new Boolean [campoX][campoY];
 	Boolean serpente[][] = new Boolean [campoX][campoY];
 	Label campo[][] = new Label [campoX][campoY];
+	Integer uccidiSerpente[][] = new Integer [campoX][campoY];
 
 	TextField cVelocità = new TextField();
 	TextField cGrandezza = new TextField();
@@ -133,12 +134,19 @@ public class Snake extends Application {
 				mele[x][y]= false;
 			}
 		}
+		//crea la griglia uccidiserpente
+		for(int y=0; y<mele.length;y++) {
+			for(int x=0; x<mele.length;x++) {
+				uccidiSerpente[x][y]=0;
+			}
+		}
+		
 		//genera la prima mela
 		mele[campoX-3][campoY/2] = true;
 		campo[campoX-3][campoY/2].getStyleClass().add("mela");
 		//genera la prima mela
-				serpente[2][campoY/2] = true;
-				campo[2][campoY/2].getStyleClass().add("serpente");
+		serpente[2][campoY/2] = true;
+		campo[2][campoY/2].getStyleClass().add("serpente");
 	}
 	private void aggiornaTimer() {
 		//conteggio punti e generazione nuova mela
@@ -154,39 +162,57 @@ public class Snake extends Application {
 			campo[snakeX][snakeY].getStyleClass().remove("mela");
 			punti+=1;
 		}
-		//movimento
-		if (alto && snakeY!=0) {
-			snakeY-=1;
-			serpente[snakeX][snakeY]=true;
-			serpente[xVecchio][yVecchio]=false;
-		//	campo[snakeX][snakeY].getStyleClass().add("serpente");
-			
+		//rimozione coda
+		for(int y=0; y<mele.length;y++) {
+			for(int x=0; x<mele.length;x++) {
+				if
+				(serpente[x][y]==true) {
+					uccidiSerpente[x][y]+=1;
+				}
+			}
 		}
-		if (basso && snakeY!=campoY-1) {
-			snakeY+=1;
-			serpente[snakeX][snakeY]=serpente[xVecchio][yVecchio];
-		//	campo[snakeX][snakeY].getStyleClass().add("serpente");
-		}
-		if (sinistra && snakeX!=0) {
-			snakeX-=1;
-			serpente[snakeX][snakeY]=serpente[xVecchio][yVecchio];
-		//	campo[snakeX][snakeY].getStyleClass().add("serpente");
-		}
-		if (destra && snakeX!=campoX-1) {
-			snakeX+=1;
-			serpente[snakeX][snakeY]=serpente[xVecchio][yVecchio];
-		//	campo[snakeX][snakeY].getStyleClass().add("serpente");
-		}
-		
-//		for(int y=0; y<serpente.length;y++) {
-//			for(int x=0; x<serpente.length;x++) {
-//				if (serpente[x][y]) {
-//					campo[x][y].getStyleClass().add("serpente");
-//				} else {
-//					campo[x][y].getStyleClass().remove("serpente");
+		int codaX=0;
+		int codaY=0;
+//		for(int y=0; y<mele.length;y++) {
+//			for(int x=0; x<mele.length;x++) {
+//				if(serpente[x][y]==) {
+//					uccidiSerpente[x][y]+=1;
 //				}
 //			}
 //		}
+		//taglia coda, prendi il maggiora dalla matrice uccidiserpente e rimuovi il true e lo stile serpente
+		//perso
+		if(snakeY==campoY || snakeY==-1 || snakeX==campoX || snakeX==-1) {
+			for(int y=0; y<campo.length;y++) {
+				for(int x=0; x<campo.length;x++) {
+					campo[x][y]= new Label();
+					campo[x][y].setVisible(false);
+				}
+			}
+			timeline.stop();
+		}
+		//movimento
+		if (alto) {
+			snakeY-=1;
+			serpente[snakeX][snakeY]=true;
+			serpente[xVecchio][yVecchio]=false;
+			campo[snakeX][snakeY].getStyleClass().add("serpente");
+		}
+		if (basso) {
+			snakeY+=1;
+			serpente[snakeX][snakeY]=true;
+			campo[snakeX][snakeY].getStyleClass().add("serpente");
+		}
+		if (sinistra) {
+			snakeX-=1;
+			serpente[snakeX][snakeY]=true;
+			campo[snakeX][snakeY].getStyleClass().add("serpente");
+		}
+		if (destra) {
+			snakeX+=1;
+			serpente[snakeX][snakeY]=true;
+			campo[snakeX][snakeY].getStyleClass().add("serpente");
+		}
 	}
 	private void pigiato(KeyEvent evento) {
 		if(evento.getText().equals("w") || evento.getText().equals("W") || evento.getCode() == KeyCode.UP) {
