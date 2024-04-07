@@ -30,8 +30,6 @@ import javafx.util.Duration;
 //effetto pacman
 
 public class Snake extends Application {
-	int campoX=15;
-	int campoY=15;
 	
 	int coloreR=0;
 	int coloreB=0;
@@ -39,15 +37,16 @@ public class Snake extends Application {
 	Boolean bBoolean=true;
 	
 	int velocità;
+	int grandezza=15;
 	
 	GridPane griglia = new GridPane();
 	Pane pannello = new Pane();
 	Label eTitolo = new Label("Snake");
 	Button bInizia = new Button("inizia");
-	Boolean mele[][] = new Boolean [campoX][campoY];
-	Boolean serpente[][] = new Boolean [campoX][campoY];
-	Label campo[][] = new Label [campoX][campoY];
-	Integer uccidiSerpente[][] = new Integer [campoX][campoY];
+	Boolean mele[][];
+	Boolean serpente[][];
+	Label campo[][];
+	Integer uccidiSerpente[][];
 
 	Slider sVelocità = new Slider(1, 3, 2);
 	Slider sGrandezza = new Slider(1, 3, 2);
@@ -58,12 +57,11 @@ public class Snake extends Application {
 	boolean destra=true;
 
 	int snakeX=2;
-	int snakeY=campoY/2;
+	int snakeY=grandezza/2;
 
 	int punti=0;
 
-	int larghezza=campoY*30;
-	int lunghezza=campoX*30;
+	int dimensioneCampo=grandezza*30;
 	
 	Label ePunteggio = new Label(punti+"");
 	
@@ -73,22 +71,22 @@ public class Snake extends Application {
 		eTitolo.setAlignment(Pos.CENTER);
 		griglia.add(pannello, 0, 0, 15, 15);
 
-		pannello.setPrefSize(larghezza, lunghezza);
+		pannello.setPrefSize(dimensioneCampo, dimensioneCampo);
 		pannello.getChildren().add(eTitolo);
 		pannello.getChildren().add(bInizia);
 		pannello.getChildren().add(sVelocità);
 		pannello.getChildren().add(sGrandezza);
 
-		eTitolo.setLayoutX(larghezza/2);
+		eTitolo.setLayoutX(dimensioneCampo/2);
 		eTitolo.setLayoutY(30);
 
-		bInizia.setLayoutX(larghezza/2);
+		bInizia.setLayoutX(dimensioneCampo/2);
 		bInizia.setLayoutY(60);
 
-		sVelocità.setLayoutX(larghezza/2);
+		sVelocità.setLayoutX(dimensioneCampo/2);
 		sVelocità.setLayoutY(90);
 
-		sGrandezza.setLayoutX(larghezza/2);
+		sGrandezza.setLayoutX(dimensioneCampo/2);
 		sGrandezza.setLayoutY(120);
 
 		 sVelocità.setShowTickMarks(true);
@@ -98,7 +96,7 @@ public class Snake extends Application {
 		 sVelocità.setMajorTickUnit(1);
 
 		bInizia.setOnAction(e-> inizia());
-		griglia.setPrefSize(larghezza, lunghezza);
+		griglia.setPrefSize(dimensioneCampo, dimensioneCampo);
 		griglia.setId("griglia");
 		griglia.setGridLinesVisible(true);
 		griglia.getStylesheets().add("it/edu/iisgubbio/gioco/Snake.css");
@@ -119,21 +117,40 @@ public class Snake extends Application {
 		 int sliderV = (int) sVelocità.getValue();
 		 switch (sliderV) {
 			case 1:
-				velocità=5;
-				break;
-			case 3:
-				velocità=300;
+				velocità=450;
 				break;
 			case 2:
-			default:
-				velocità=1;
-			
+				velocità=300;
+				break;
+			case 3:
+				velocità=150;
+				break;
 		}
 		 timeline = new Timeline(new KeyFrame(
 					Duration.millis(velocità),
 					x -> aggiornaTimer()));
 		 timeline.setCycleCount(Animation.INDEFINITE);
 		 timeline.play();
+		//grandezza campo
+		 int sliderG = (int) sGrandezza.getValue();
+		 switch (sliderG) {
+			case 1:
+				grandezza=7;
+				break;
+			case 2:
+				grandezza=15;
+				break;
+			case 3:
+				grandezza=30;
+				break;
+		}
+			mele = new Boolean [grandezza][grandezza];
+			serpente = new Boolean [grandezza][grandezza];
+			campo = new Label [grandezza][grandezza];
+			uccidiSerpente = new Integer [grandezza][grandezza];
+			dimensioneCampo=grandezza*30;
+			griglia.setPrefSize(dimensioneCampo, dimensioneCampo);
+			
 		//crea il campo e lo colora
 		for(int y=0; y<campo.length;y++) {
 			for(int x=0; x<campo.length;x++) {
@@ -173,11 +190,11 @@ public class Snake extends Application {
 		}
 
 		//genera la prima mela
-		mele[campoX-3][campoY/2] = true;
-		campo[campoX-3][campoY/2].getStyleClass().add("mela");
+		mele[grandezza-3][grandezza/2] = true;
+		campo[grandezza-3][grandezza/2].getStyleClass().add("mela");
 		//genera la prima mela
-		serpente[2][campoY/2] = true;
-		campo[2][campoY/2].getStyleClass().add("serpente");
+		serpente[2][grandezza/2] = true;
+		campo[2][grandezza/2].getStyleClass().add("serpente");
 	}
 	private void aggiornaTimer() {
 		//conteggio punti e generazione nuova mela
@@ -202,7 +219,7 @@ public class Snake extends Application {
 		}
 		campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
 		//perso
-		if(snakeY==campoY || snakeY==-1 || snakeX==campoX || snakeX==-1 || uccidiSerpente[snakeX][snakeY]>1) {
+		if(snakeY==grandezza || snakeY==-1 || snakeX==grandezza || snakeX==-1 || uccidiSerpente[snakeX][snakeY]>1) {
 			//					for(int y=0; y<campo.length;y++) {
 			//						for(int x=0; x<campo.length;x++) {
 			//							campo[x][y]= new Label();
@@ -212,8 +229,8 @@ public class Snake extends Application {
 			timeline.stop();
 		}
 		if (mele[snakeX][snakeY]==true) {
-			int melaX=(int)(Math.random() * campoX-1);
-			int melaY=(int)(Math.random() * campoY-1);
+			int melaX=(int)(Math.random() * grandezza-1);
+			int melaY=(int)(Math.random() * grandezza-1);
 			mele[melaX][melaY] = true;
 			campo[melaX][melaY].getStyleClass().add("mela");
 			mele[snakeX][snakeY] = false;
