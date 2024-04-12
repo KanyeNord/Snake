@@ -1,5 +1,4 @@
 package it.edu.iisgubbio.gioco;
-
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -13,6 +12,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.AudioClip;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -28,21 +28,22 @@ import javafx.util.Duration;
 //fare in modo che una mela non possa generarsi sul serpente
 //sistemare il problema del suicidio premendo tanti tasti, usare la griglia uccidiserpente=1
 //inserire il punteggio in alto
-//inserire il suono
+//modificare il suono
 public class Snake extends Application {
 
-	int coloreR=(int)(Math.random()*256);	;
-	int coloreB=(int)(Math.random()*256);
+	int coloreR=(int)(Math.random()*220)+20;	;
+	int coloreB=(int)(Math.random()*220)+20;
 	Boolean rBoolean=true;
 	Boolean bBoolean=true;
 
 	int velocità;
 	int grandezza=15;
-
+	int punti=0;
 	GridPane griglia = new GridPane();
 	Pane pannello = new Pane();
 	Label eTitolo = new Label("Snake");
 	Button bInizia = new Button("inizia");
+	Label ePunteggio = new Label("punti= "+punti);
 	Boolean mele[][];
 	Boolean serpente[][];
 	Label campo[][];
@@ -50,7 +51,6 @@ public class Snake extends Application {
 
 	Slider sVelocità = new Slider(1, 3, 2);
 	Slider sGrandezza = new Slider(1, 3, 2);
-
 	boolean alto=false;
 	boolean basso=false;
 	boolean sinistra=false;
@@ -59,21 +59,21 @@ public class Snake extends Application {
 	int snakeX;
 	int snakeY;
 
-	int punti=0;
 
 	int dimensioneCampo=grandezza*30;
 
-	Label ePunteggio = new Label(punti+"");
+
 
 	Timeline timeline;
-
 	Stage finestra1;
 
 	public void start(Stage finestra) {
-		finestra1=finestra;
+		final AudioClip pino= new AudioClip(getClass().getResource("Note Killer.mp3").toString());
+		pino.play();
 
+		finestra1=finestra;
 		eTitolo.setAlignment(Pos.CENTER);
-		griglia.add(pannello, 0, 0, 15, 15);
+		griglia.add(pannello, 0, 1, 15, 15);
 
 		pannello.setPrefSize(dimensioneCampo, dimensioneCampo);
 		pannello.getChildren().add(eTitolo);
@@ -118,12 +118,14 @@ public class Snake extends Application {
 		finestra.show();
 	}
 	public void inizia() {
+
 		bInizia.setVisible(false);
 		eTitolo.setVisible(false);
 		sVelocità.setVisible(false);
 		sGrandezza.setVisible(false);
 		pannello.setVisible(false);
 
+		griglia.add(ePunteggio, 0, 0);
 		//velocità gioco
 		int sliderV = (int) sVelocità.getValue();
 		switch (sliderV) {
@@ -221,10 +223,10 @@ public class Snake extends Application {
 		} else {
 			coloreR-=20;
 		}
-		if(coloreR>=255) {
+		if(coloreR>=240) {
 			rBoolean=false;
 		} else {
-			if (coloreR<=0)
+			if (coloreR<=20)
 				rBoolean=true;
 		}
 
@@ -234,10 +236,10 @@ public class Snake extends Application {
 			coloreB-=20;
 		}
 		coloreB+=10;
-		if(coloreB>=255) {
+		if(coloreB>=240) {
 			bBoolean=false;
 		} else {
-			if (coloreB<=0)
+			if (coloreB<=20)
 				bBoolean=true;
 		}
 
@@ -275,6 +277,7 @@ public class Snake extends Application {
 					uccidiSerpente[x][y]+=1;
 					//debug
 					campo[x][y].setText(uccidiSerpente[x][y]+"");
+
 				}
 			}
 		}
