@@ -18,6 +18,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -46,7 +47,7 @@ public class Snake extends Application {
 	Label eTitolo = new Label("Snake");
 	Button bInizia = new Button("inizia");
 	Label ePunteggio = new Label("punti: "+punti);
-	Label eSconfitta = new Label("Hai perso");
+	Label eSconfitta = new Label("GAME OVER");
 	Button bRigioca = new Button("rigioca");
 	Boolean mele[][];
 	Boolean serpente[][];
@@ -68,6 +69,7 @@ public class Snake extends Application {
 
 
 
+	
 
 	Image iMela = new Image(getClass().getResourceAsStream("Mela.png"));
 	ImageView immagineMela = new ImageView(iMela);
@@ -90,7 +92,7 @@ public class Snake extends Application {
 
 	Image iSfondoMedio = new Image(getClass().getResourceAsStream("SfondoMedio.png"));
 	ImageView immagineSfondoMedio = new ImageView(iSfondoMedio);
-
+	
 	Image iSfondoMaxi = new Image(getClass().getResourceAsStream("SfondoMaxi.png"));
 	ImageView immagineSfondoMaxi = new ImageView(iSfondoMaxi);
 
@@ -105,7 +107,6 @@ public class Snake extends Application {
 		final AudioClip musica= new AudioClip(getClass().getResource("Snake.io Music.mp3").toString());
 //		musica.setVolume(50);
 //				musica.play();
-
 		immagineSfondo.setFitHeight(dimensioneCampo);
 		immagineSfondo.setFitWidth(dimensioneCampo);
 		pannello.getChildren().add(eSfondo);
@@ -141,10 +142,10 @@ public class Snake extends Application {
 		bRigioca.setVisible(false);
 
 		griglia.setLayoutY(50);
-
-		eTitolo.setLayoutX(dimensioneCampo/2);
+		
+		eTitolo.setPrefWidth(400);
+		eTitolo.setLayoutX(dimensioneCampo-400/2);
 		eTitolo.setLayoutY(30);
-
 		eTitolo.setLayoutX(dimensioneCampo/2);
 		eTitolo.setLayoutY(30);
 
@@ -174,23 +175,21 @@ public class Snake extends Application {
 		sGrandezza.setSnapToTicks(true);
 		sGrandezza.setMinorTickCount(0);
 		sGrandezza.setMajorTickUnit(1);
-		
-		URL u= Snake.class.getResource("retro_computer_personal_use.ttf");
-		 Font font = Font.loadFont(u.toString(), 30);
+
+		Font font = Font.loadFont(getClass().getResource("retro_computer_personal_use.ttf").toString(), 30);
 		eTitolo.setFont(font);
 		ePunteggio.setFont(font);
 		
-		 DropShadow shadow = new DropShadow();
-	      shadow.setOffsetY(5.0);
-	      eTitolo.setEffect(shadow);
+		 DropShadow shadowTitolo = new DropShadow();
+	      shadowTitolo.setOffsetY(5.0);
+	      shadowTitolo.setColor(Color.WHITE);
+		 DropShadow shadowTesto = new DropShadow();
+	      shadowTesto.setOffsetY(1.0);
+	      shadowTesto.setColor(Color.DARKGOLDENROD);
+	      eTitolo.setEffect(shadowTitolo);
+	      ePunteggio.setEffect(shadowTesto);
+			eSconfitta.setEffect(shadowTesto);
 		
-		
-		//		griglia.setStyle("-fx-background-image: url('pino.png'); " +
-		//                "-fx-background-size: cover;");
-		//		eTitolo.setId("titolo");
-		//		pannello.setId("pannello");
-		//		griglia.setId("griglia");
-
 		bInizia.setOnAction(e-> inizia());
 		bRigioca.setOnAction(e-> inizia());
 
@@ -295,7 +294,7 @@ public class Snake extends Application {
 				serpente[x][y]= false;
 			}
 		}
-		//crea la griglia di mele
+		//crea la griglia delle mele
 		for(int y=0; y<mele.length;y++) {
 			for(int x=0; x<mele.length;x++) {
 				mele[x][y]= false;
@@ -309,7 +308,6 @@ public class Snake extends Application {
 		}
 		//genera la prima mela
 		mele[grandezza-snakeX-2][snakeY] = true;
-		//		campo[grandezza-snakeX-2][snakeY].getStyleClass().add("mela");
 		campo[grandezza-snakeX-2][snakeY].setGraphic(immagineMela);
 	}
 	private void aggiornaTimer() {
@@ -447,13 +445,6 @@ public class Snake extends Application {
 		}
 	}
 
-	private void posizionaMela() {
-		melaX=(int)(Math.random() * grandezza-1);
-		melaY=(int)(Math.random() * grandezza-1);
-		if(serpente[melaX][melaY]==true) {
-			posizionaMela();
-		}
-	}
 	private void pigiato(KeyEvent evento) {
 		boolean blockW=false;
 		boolean blockA=false;
@@ -519,8 +510,6 @@ public class Snake extends Application {
 		basso=false;
 		sinistra=false;
 		destra=true;
-
-
 	}
 	public static void main(String[] args) {
 		launch(args);
