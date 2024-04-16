@@ -1,4 +1,6 @@
 package it.edu.iisgubbio.gioco;
+import java.net.URL;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -8,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -15,6 +18,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -77,12 +81,6 @@ public class Snake extends Application {
 	Image iOcchiDestra = new Image(getClass().getResourceAsStream("Occhi Destra.png"));
 	ImageView immagineOcchiDestra = new ImageView(iOcchiDestra);
 
-
-
-	int mMeleX[][];
-	int mMeleY[][];	
-
-
 	Image iSfondo = new Image(getClass().getResourceAsStream("Sfondo.png"));
 	ImageView immagineSfondo = new ImageView(iSfondo);
 
@@ -104,8 +102,10 @@ public class Snake extends Application {
 	Stage finestraRidimensionata;
 
 	public void start(Stage finestra) {
-		final AudioClip musica= new AudioClip(getClass().getResource("Note Killer.mp3").toString());
-		//		musica.play();
+		final AudioClip musica= new AudioClip(getClass().getResource("Snake.io Music.mp3").toString());
+//		musica.setVolume(50);
+//				musica.play();
+
 		immagineSfondo.setFitHeight(dimensioneCampo);
 		immagineSfondo.setFitWidth(dimensioneCampo);
 		pannello.getChildren().add(eSfondo);
@@ -174,7 +174,17 @@ public class Snake extends Application {
 		sGrandezza.setSnapToTicks(true);
 		sGrandezza.setMinorTickCount(0);
 		sGrandezza.setMajorTickUnit(1);
-
+		
+		URL u= Snake.class.getResource("retro_computer_personal_use.ttf");
+		 Font font = Font.loadFont(u.toString(), 30);
+		eTitolo.setFont(font);
+		ePunteggio.setFont(font);
+		
+		 DropShadow shadow = new DropShadow();
+	      shadow.setOffsetY(5.0);
+	      eTitolo.setEffect(shadow);
+		
+		
 		//		griglia.setStyle("-fx-background-image: url('pino.png'); " +
 		//                "-fx-background-size: cover;");
 		//		eTitolo.setId("titolo");
@@ -248,36 +258,13 @@ public class Snake extends Application {
 		campo = new Label [grandezza][grandezza];
 		uccidiSerpente = new int [grandezza][grandezza];
 		dimensioneCampo=grandezza*30;
+		
+		
+		
+		
+		
 
-
-		mMeleX= new int [grandezza][grandezza];
-		mMeleY= new int [grandezza][grandezza];
-
-		int scambioX;
-		int scambioY;
-		for(int y=0; y<mMeleX.length;y++) {
-			for(int x=0; x<mMeleX.length;x++) {
-				mMeleX[x][y]=x;
-				mMeleY[x][y]=y;
-			}
-		}
-		for(int y=0; y<mMeleX.length;y++) {
-			for(int x=0; x<mMeleX.length;x++) {
-				int randomX=(int)(Math.random() * grandezza-1);
-				int randomY=(int)(Math.random() * grandezza-1);
-				scambioX=mMeleX[x][y];
-				mMeleX[x][y]=mMeleX[randomX][randomY];
-				mMeleX[randomX][randomY]=scambioX;
-				scambioY=mMeleY[x][y];
-				mMeleY[x][y]=mMeleY[randomX][randomY];
-				mMeleY[randomX][randomY]=scambioY;
-			}
-		}
-
-
-
-
-
+		
 
 
 
@@ -358,11 +345,23 @@ public class Snake extends Application {
 		//conteggio punti e generazione nuova mela
 		if (mele[snakeX][snakeY]) {
 			mele[snakeX][snakeY] = false;
-			melaX=(int)(Math.random() * grandezza-1);
-			melaY=(int)(Math.random() * grandezza-1);
-//			if(serpente[melaX][melaY]==true) {
-//				posizionaMela();
-//			}
+			
+			
+			int meleLibere[];
+			int i=0;
+			meleLibere =new int[grandezza*grandezza];
+			for(int y=0; y<mele.length;y++) {
+				for(int x=0; x<mele.length;x++) {
+					if(serpente[x][y]==false) {
+						meleLibere[i]=x*100+y;
+						i++;
+						
+					}
+				}
+			}
+			int indiceMela=(int)(Math.random() * i);
+			melaX=meleLibere[indiceMela]/100;
+			melaY=meleLibere[indiceMela]%100;
 			mele[melaX][melaY] = true;
 			campo[melaX][melaY].setGraphic(immagineMela);
 			campo[snakeX][snakeY].setGraphic(null);
