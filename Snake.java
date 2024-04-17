@@ -1,13 +1,14 @@
 package it.edu.iisgubbio.gioco;
-import java.net.URL;
 
 import javafx.animation.Animation;
+import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.effect.DropShadow;
@@ -24,14 +25,16 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 //TODO
-//schermata di vittoria e sconfitta
-//menù principale e personalizzazione
-//effetto pacman
-//fare in modo che una mela non possa generarsi sul serpente
-//inserire lo sfondo per il punteggio e aggiungere alla barra superiore il tasto per mutare il gioco
-//modificare il suono
-//sistemare la grandezza della finestra
-//aggiungere font
+//TODO di vittoria e sconfitta
+//TODO menù principale e personalizzazione
+//TODO controllare se si può ottimizzare effetto pacman
+//TODO inserire lo sfondo per il punteggio e aggiungere alla barra superiore il tasto per mutare il gioco
+//TODO modificare il suono
+//TODO sistemare la grandezza della finestra
+//TODO aggiungere font
+//TODO aggiungi i commenti
+//TODO indentare bene
+
 public class Snake extends Application {
 
 	int coloreR=(int)(Math.random()*220)+20;	;
@@ -56,6 +59,10 @@ public class Snake extends Application {
 
 	Slider sVelocità = new Slider(1, 3, 2);
 	Slider sGrandezza = new Slider(1, 3, 2);
+	
+	CheckBox cPacman = new CheckBox("effetto pacman");
+	boolean pacman=false;
+	
 	boolean alto=false;
 	boolean basso=false;
 	boolean sinistra=false;
@@ -66,11 +73,9 @@ public class Snake extends Application {
 
 	int melaX;
 	int melaY;
-
-
-
 	
-
+	boolean tastiPremibili=false;
+	
 	Image iMela = new Image(getClass().getResourceAsStream("Mela.png"));
 	ImageView immagineMela = new ImageView(iMela);
 
@@ -98,15 +103,17 @@ public class Snake extends Application {
 
 	int dimensioneCampo=grandezza*30;
 	Label eSfondo = new Label();
-
+	final AudioClip musica= new AudioClip(getClass().getResource("Snake.io Music.mp3").toString());
 
 	Timeline timeline;
 	Stage finestraRidimensionata;
 
 	public void start(Stage finestra) {
-		final AudioClip musica= new AudioClip(getClass().getResource("Snake.io Music.mp3").toString());
-//		musica.setVolume(50);
-//				musica.play();
+//		if(timeline.getStatus()==Status.RUNNING) {
+//			
+//		}
+		musica.setVolume(50);
+				musica.play();
 		immagineSfondo.setFitHeight(dimensioneCampo);
 		immagineSfondo.setFitWidth(dimensioneCampo);
 		pannello.getChildren().add(eSfondo);
@@ -134,6 +141,7 @@ public class Snake extends Application {
 		pannello.getChildren().add(bInizia);
 		pannello.getChildren().add(sVelocità);
 		pannello.getChildren().add(sGrandezza);
+		pannello.getChildren().add(cPacman);
 		pannello.getChildren().add(ePunteggio);
 		pannello.getChildren().add(eSconfitta);
 		pannello.getChildren().add(bRigioca);
@@ -158,6 +166,9 @@ public class Snake extends Application {
 		sGrandezza.setLayoutX(dimensioneCampo/2);
 		sGrandezza.setLayoutY(120);
 
+		cPacman.setLayoutX(dimensioneCampo/2);
+		cPacman.setLayoutY(150);
+		
 		eSconfitta.setLayoutX(dimensioneCampo/2);
 		eSconfitta.setLayoutY(dimensioneCampo/2);
 
@@ -198,15 +209,17 @@ public class Snake extends Application {
 		Scene scena = new Scene(pannello);
 		finestra.setTitle("Snake");
 		finestra.setScene(scena);
+		
 		scena.setOnKeyPressed(e -> pigiato(e));
 		finestra.show();
 	}
 	public void inizia() {
-
+		tastiPremibili=true;
 		bInizia.setVisible(false);
 		eTitolo.setVisible(false);
 		sVelocità.setVisible(false);
 		sGrandezza.setVisible(false);
+		cPacman.setVisible(false);
 		ePunteggio.setVisible(true);
 		eSconfitta.setVisible(false);
 		bRigioca.setVisible(false);
@@ -257,20 +270,19 @@ public class Snake extends Application {
 		campo = new Label [grandezza][grandezza];
 		uccidiSerpente = new int [grandezza][grandezza];
 		dimensioneCampo=grandezza*30;
-		
-		
-		
-		
-		
-
-		
-
-
-
+		//FIXME
 		pannello.setPrefSize(dimensioneCampo+20, dimensioneCampo);
 		finestraRidimensionata.setWidth(dimensioneCampo+15);
 		finestraRidimensionata.setHeight(dimensioneCampo+90);
 		//		immagineSfondo.setFitWidth(dimensioneCampo);
+		
+		//effetto pacman
+		if( cPacman.isSelected() ) {
+            pacman=true;
+        }else {
+        	pacman=false;
+        }
+
 		//crea il campo e lo colora
 		for(int y=0; y<campo.length;y++) {
 			for(int x=0; x<campo.length;x++) {
@@ -401,6 +413,48 @@ public class Snake extends Application {
 			//			schermataVittoria();
 		}
 		//movimento
+		if(pacman) {
+			if (alto && !basso) {
+				snakeY-=1;
+				if (snakeY==-1) {
+					snakeY=grandezza-1;
+				}
+					serpente[snakeX][snakeY]=true;
+					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+					campo[snakeX][snakeY].setGraphic(immagineOcchiAlto);
+			}
+			if (basso && !alto) {
+				snakeY+=1;
+				if(snakeY==grandezza) {
+					snakeY=0;
+				}
+					
+					serpente[snakeX][snakeY]=true;
+					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+					campo[snakeX][snakeY].setGraphic(immagineOcchiBasso);
+				}
+			
+			if (sinistra && !destra) {
+				snakeX-=1;
+				if(snakeX==-1) {
+				snakeX=grandezza-1;
+				}
+					serpente[snakeX][snakeY]=true;
+					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+					campo[snakeX][snakeY].setGraphic(immagineOcchiSinistra);
+				
+			}
+			if (destra && !sinistra) {
+				snakeX+=1;
+				if(snakeX==grandezza) {
+					snakeX=0;
+				}
+					serpente[snakeX][snakeY]=true;
+					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+					campo[snakeX][snakeY].setGraphic(immagineOcchiDestra);
+				
+		}
+		}else {
 		if (alto && !basso) {
 			snakeY-=1;
 			if (snakeY!=-1) {
@@ -433,19 +487,22 @@ public class Snake extends Application {
 				campo[snakeX][snakeY].setGraphic(immagineOcchiDestra);
 			}
 		}
+		
+		}
 		//sconfitta
-		if(snakeY==grandezza || snakeY==-1 || snakeX==grandezza || snakeX==-1) {
-			timeline.stop();
-			schermataSconfitta();
-		}
-		//sconfitta suicidio
-		if(uccidiSerpente[snakeX][snakeY]>1) {
-			timeline.stop();
-			schermataSconfitta();
-		}
+				if(snakeY==grandezza || snakeY==-1 || snakeX==grandezza || snakeX==-1) {
+					timeline.stop();
+					schermataSconfitta();
+				}
+				//sconfitta suicidio
+				if(uccidiSerpente[snakeX][snakeY]>1) {
+					timeline.stop();
+					schermataSconfitta();
 	}
-
+		
+	}
 	private void pigiato(KeyEvent evento) {
+		if(tastiPremibili==true) {
 		boolean blockW=false;
 		boolean blockA=false;
 		boolean blockS=false;
@@ -468,6 +525,7 @@ public class Snake extends Application {
 				}
 			}
 		}
+		
 		if(!blockW &&(evento.getText().equals("w") || evento.getText().equals("W") || evento.getCode() == KeyCode.UP)) {
 			alto=true;
 			basso=false;
@@ -491,6 +549,10 @@ public class Snake extends Application {
 			basso=false;
 			sinistra=false;
 			destra=true;
+		}
+		if(evento.getText().equals("e") || evento.getText().equals("E")) {
+			musica.stop();
+		}
 		}
 	}
 	private void schermataSconfitta() {
