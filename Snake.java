@@ -1,7 +1,6 @@
 package it.edu.iisgubbio.gioco;
 
 import javafx.animation.Animation;
-import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -24,17 +23,13 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-//TODO
-//TODO di vittoria e sconfitta
+//TODO schermata di vittoria e sconfitta
 //TODO menù principale e personalizzazione
 //TODO controllare se si può ottimizzare effetto pacman
-//TODO inserire lo sfondo per il punteggio e aggiungere alla barra superiore il tasto per mutare il gioco
-//TODO modificare il suono
-//TODO sistemare la grandezza della finestra
-//TODO aggiungere font
+//TODO trovare modo di abbassare il volume invece di fare ripartire la musica
 //TODO aggiungi i commenti
 //TODO indentare bene
-
+//TODO sistemare gli sfondi
 public class Snake extends Application {
 
 	int coloreR=(int)(Math.random()*220)+20;	;
@@ -52,6 +47,7 @@ public class Snake extends Application {
 	Label ePunteggio = new Label("punti: "+punti);
 	Label eSconfitta = new Label("GAME OVER");
 	Button bRigioca = new Button("rigioca");
+	Label eVolume = new Label("cds");
 	Boolean mele[][];
 	Boolean serpente[][];
 	Label campo[][];
@@ -59,10 +55,10 @@ public class Snake extends Application {
 
 	Slider sVelocità = new Slider(1, 3, 2);
 	Slider sGrandezza = new Slider(1, 3, 2);
-	
+
 	CheckBox cPacman = new CheckBox("effetto pacman");
 	boolean pacman=false;
-	
+
 	boolean alto=false;
 	boolean basso=false;
 	boolean sinistra=false;
@@ -73,9 +69,9 @@ public class Snake extends Application {
 
 	int melaX;
 	int melaY;
-	
+
 	boolean tastiPremibili=false;
-	
+
 	Image iMela = new Image(getClass().getResourceAsStream("Mela.png"));
 	ImageView immagineMela = new ImageView(iMela);
 
@@ -97,25 +93,37 @@ public class Snake extends Application {
 
 	Image iSfondoMedio = new Image(getClass().getResourceAsStream("SfondoMedio.png"));
 	ImageView immagineSfondoMedio = new ImageView(iSfondoMedio);
-	
+
 	Image iSfondoMaxi = new Image(getClass().getResourceAsStream("SfondoMaxi.png"));
 	ImageView immagineSfondoMaxi = new ImageView(iSfondoMaxi);
+
+	Image iVolume = new Image(getClass().getResourceAsStream("volume-up.png"));
+	ImageView immagineVolume= new ImageView(iVolume);
+
+	Image iVolumeMutato = new Image(getClass().getResourceAsStream("volume-down.png"));
+	ImageView immagineVolumeMutato = new ImageView(iVolumeMutato);
+
+	boolean volume= true;
+
+
 
 	int dimensioneCampo=grandezza*30;
 	Label eSfondo = new Label();
 	final AudioClip musica= new AudioClip(getClass().getResource("Snake.io Music.mp3").toString());
-
+	//	final AudioClip melaMangiata= new AudioClip(getClass().getResource("gulp gulp gulp gulp sound effect.mp3").toString());
+	final AudioClip melaMangiata= new AudioClip(getClass().getResource("apple-bite.mp3").toString());
+	final AudioClip vittoria= new AudioClip(getClass().getResource("suono-vittoria.mp3").toString());
+	final AudioClip sconfitta= new AudioClip(getClass().getResource("suono-sconfitta.mp3").toString());
 	Timeline timeline;
 	Stage finestraRidimensionata;
 
 	public void start(Stage finestra) {
-//		if(timeline.getStatus()==Status.RUNNING) {
-//			
-//		}
-		musica.setVolume(50);
-				musica.play();
-		immagineSfondo.setFitHeight(dimensioneCampo);
-		immagineSfondo.setFitWidth(dimensioneCampo);
+		musica.setVolume(40);
+		//		musica.play();
+		musica.setCycleCount(AudioClip.INDEFINITE);
+		eVolume.setGraphic(immagineVolume);
+		//		immagineSfondo.setFitHeight(dimensioneCampo);
+		//		immagineSfondo.setFitWidth(dimensioneCampo);
 		pannello.getChildren().add(eSfondo);
 		eSfondo.setGraphic(immagineSfondoMedio);
 		immagineSfondoMedio.setPreserveRatio(true);
@@ -130,14 +138,18 @@ public class Snake extends Application {
 		immagineOcchiBasso.setPreserveRatio(true);
 		immagineOcchiDestra.setFitHeight(30);
 		immagineOcchiDestra.setPreserveRatio(true);
+		immagineVolume.setFitHeight(40);
+		immagineVolume.setPreserveRatio(true);
+		immagineVolumeMutato.setFitHeight(40);
+		immagineVolumeMutato.setPreserveRatio(true);
 
 		finestraRidimensionata=finestra;
 		eTitolo.setAlignment(Pos.CENTER);
 
 
 		pannello.setPrefSize(dimensioneCampo, dimensioneCampo);
-		pannello.getChildren().add(griglia);
 		pannello.getChildren().add(eTitolo);
+		pannello.getChildren().add(griglia);
 		pannello.getChildren().add(bInizia);
 		pannello.getChildren().add(sVelocità);
 		pannello.getChildren().add(sGrandezza);
@@ -145,35 +157,37 @@ public class Snake extends Application {
 		pannello.getChildren().add(ePunteggio);
 		pannello.getChildren().add(eSconfitta);
 		pannello.getChildren().add(bRigioca);
+		pannello.getChildren().add(eVolume);
 		ePunteggio.setVisible(false);
 		eSconfitta.setVisible(false);
 		bRigioca.setVisible(false);
 
 		griglia.setLayoutY(50);
-		
-		eTitolo.setPrefWidth(400);
-		eTitolo.setLayoutX(dimensioneCampo-400/2);
-		eTitolo.setLayoutY(30);
-		eTitolo.setLayoutX(dimensioneCampo/2);
-		eTitolo.setLayoutY(30);
 
-		bInizia.setLayoutX(dimensioneCampo/2);
-		bInizia.setLayoutY(60);
+		eTitolo.setPrefWidth(130);
+		eTitolo.setLayoutX(dimensioneCampo/2-65);
+		eTitolo.setLayoutY(60);
 
-		sVelocità.setLayoutX(dimensioneCampo/2);
-		sVelocità.setLayoutY(90);
+		bInizia.setPrefWidth(130);
+		bInizia.setPrefHeight(40);
+		bInizia.setLayoutX(dimensioneCampo/2-65);
+		bInizia.setLayoutY(120);
 
-		sGrandezza.setLayoutX(dimensioneCampo/2);
-		sGrandezza.setLayoutY(120);
+		sVelocità.setPrefWidth(130);
+		sVelocità.setLayoutX(dimensioneCampo/2-65);
+		sVelocità.setLayoutY(210);
 
-		cPacman.setLayoutX(dimensioneCampo/2);
-		cPacman.setLayoutY(150);
-		
-		eSconfitta.setLayoutX(dimensioneCampo/2);
-		eSconfitta.setLayoutY(dimensioneCampo/2);
+		sGrandezza.setPrefWidth(130);
+		sGrandezza.setLayoutX(dimensioneCampo/2-65);
+		sGrandezza.setLayoutY(250);
 
-		bRigioca.setLayoutX(dimensioneCampo/2);
-		bRigioca.setLayoutY(dimensioneCampo/2+30);
+		cPacman.setLayoutX(dimensioneCampo/2-65);
+		cPacman.setLayoutY(290);
+
+
+
+		eVolume.setLayoutX(dimensioneCampo-45);
+		eVolume.setLayoutY(5);
 
 		sVelocità.setShowTickMarks(true);
 		sVelocità.setShowTickLabels(true);
@@ -190,17 +204,17 @@ public class Snake extends Application {
 		Font font = Font.loadFont(getClass().getResource("retro_computer_personal_use.ttf").toString(), 30);
 		eTitolo.setFont(font);
 		ePunteggio.setFont(font);
-		
-		 DropShadow shadowTitolo = new DropShadow();
-	      shadowTitolo.setOffsetY(5.0);
-	      shadowTitolo.setColor(Color.WHITE);
-		 DropShadow shadowTesto = new DropShadow();
-	      shadowTesto.setOffsetY(1.0);
-	      shadowTesto.setColor(Color.DARKGOLDENROD);
-	      eTitolo.setEffect(shadowTitolo);
-	      ePunteggio.setEffect(shadowTesto);
-			eSconfitta.setEffect(shadowTesto);
-		
+
+		DropShadow shadowTitolo = new DropShadow();
+		shadowTitolo.setOffsetY(5.0);
+		shadowTitolo.setColor(Color.WHITE);
+		DropShadow shadowTesto = new DropShadow();
+		shadowTesto.setOffsetY(1.0);
+		shadowTesto.setColor(Color.DARKGOLDENROD);
+		eTitolo.setEffect(shadowTitolo);
+		ePunteggio.setEffect(shadowTesto);
+		eSconfitta.setEffect(shadowTesto);
+
 		bInizia.setOnAction(e-> inizia());
 		bRigioca.setOnAction(e-> inizia());
 
@@ -209,7 +223,6 @@ public class Snake extends Application {
 		Scene scena = new Scene(pannello);
 		finestra.setTitle("Snake");
 		finestra.setScene(scena);
-		
 		scena.setOnKeyPressed(e -> pigiato(e));
 		finestra.show();
 	}
@@ -270,18 +283,22 @@ public class Snake extends Application {
 		campo = new Label [grandezza][grandezza];
 		uccidiSerpente = new int [grandezza][grandezza];
 		dimensioneCampo=grandezza*30;
-		//FIXME
-		pannello.setPrefSize(dimensioneCampo+20, dimensioneCampo);
-		finestraRidimensionata.setWidth(dimensioneCampo+15);
-		finestraRidimensionata.setHeight(dimensioneCampo+90);
-		//		immagineSfondo.setFitWidth(dimensioneCampo);
-		
+		pannello.setPrefSize(dimensioneCampo, dimensioneCampo+50);
+		finestraRidimensionata.sizeToScene();
+
+		eSconfitta.setPrefWidth(130);
+		eSconfitta.setLayoutX(dimensioneCampo/2-65);
+		eSconfitta.setLayoutY(dimensioneCampo/2);
+
+		bRigioca.setPrefWidth(130);
+		bRigioca.setLayoutX(dimensioneCampo/2-65);
+		bRigioca.setLayoutY(dimensioneCampo/2+30);
 		//effetto pacman
 		if( cPacman.isSelected() ) {
-            pacman=true;
-        }else {
-        	pacman=false;
-        }
+			pacman=true;
+		}else {
+			pacman=false;
+		}
 
 		//crea il campo e lo colora
 		for(int y=0; y<campo.length;y++) {
@@ -355,8 +372,8 @@ public class Snake extends Application {
 		//conteggio punti e generazione nuova mela
 		if (mele[snakeX][snakeY]) {
 			mele[snakeX][snakeY] = false;
-			
-			
+			melaMangiata.play();
+
 			int meleLibere[];
 			int i=0;
 			meleLibere =new int[grandezza*grandezza];
@@ -365,7 +382,7 @@ public class Snake extends Application {
 					if(serpente[x][y]==false) {
 						meleLibere[i]=x*100+y;
 						i++;
-						
+
 					}
 				}
 			}
@@ -377,6 +394,7 @@ public class Snake extends Application {
 			campo[snakeX][snakeY].setGraphic(null);
 			punti+=1;
 			ePunteggio.setText("punti: "+ punti);
+
 
 		}else {
 			//coda del serpente
@@ -408,8 +426,9 @@ public class Snake extends Application {
 			}
 		}
 		//vittoria
-		if(punti==grandezza*grandezza) {
+		if(punti==(grandezza*grandezza)-2) {
 			timeline.stop();
+			vittoria.play();
 			//			schermataVittoria();
 		}
 		//movimento
@@ -419,140 +438,148 @@ public class Snake extends Application {
 				if (snakeY==-1) {
 					snakeY=grandezza-1;
 				}
-					serpente[snakeX][snakeY]=true;
-					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
-					campo[snakeX][snakeY].setGraphic(immagineOcchiAlto);
+				serpente[snakeX][snakeY]=true;
+				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+				campo[snakeX][snakeY].setGraphic(immagineOcchiAlto);
 			}
 			if (basso && !alto) {
 				snakeY+=1;
 				if(snakeY==grandezza) {
 					snakeY=0;
 				}
-					
-					serpente[snakeX][snakeY]=true;
-					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
-					campo[snakeX][snakeY].setGraphic(immagineOcchiBasso);
-				}
-			
+
+				serpente[snakeX][snakeY]=true;
+				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+				campo[snakeX][snakeY].setGraphic(immagineOcchiBasso);
+			}
+
 			if (sinistra && !destra) {
 				snakeX-=1;
 				if(snakeX==-1) {
-				snakeX=grandezza-1;
+					snakeX=grandezza-1;
 				}
-					serpente[snakeX][snakeY]=true;
-					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
-					campo[snakeX][snakeY].setGraphic(immagineOcchiSinistra);
-				
+				serpente[snakeX][snakeY]=true;
+				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+				campo[snakeX][snakeY].setGraphic(immagineOcchiSinistra);
+
 			}
 			if (destra && !sinistra) {
 				snakeX+=1;
 				if(snakeX==grandezza) {
 					snakeX=0;
 				}
-					serpente[snakeX][snakeY]=true;
-					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
-					campo[snakeX][snakeY].setGraphic(immagineOcchiDestra);
-				
-		}
-		}else {
-		if (alto && !basso) {
-			snakeY-=1;
-			if (snakeY!=-1) {
-				serpente[snakeX][snakeY]=true;
-				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
-				campo[snakeX][snakeY].setGraphic(immagineOcchiAlto);
-			}
-		}
-		if (basso && !alto) {
-			snakeY+=1;
-			if(snakeY!=grandezza) {
-				serpente[snakeX][snakeY]=true;
-				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
-				campo[snakeX][snakeY].setGraphic(immagineOcchiBasso);
-			}
-		}
-		if (sinistra && !destra) {
-			snakeX-=1;
-			if(snakeX!=-1) {
-				serpente[snakeX][snakeY]=true;
-				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
-				campo[snakeX][snakeY].setGraphic(immagineOcchiSinistra);
-			}
-		}
-		if (destra && !sinistra) {
-			snakeX+=1;
-			if(snakeX!=grandezza) {
 				serpente[snakeX][snakeY]=true;
 				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
 				campo[snakeX][snakeY].setGraphic(immagineOcchiDestra);
+
+			}
+		}else {
+			if (alto && !basso) {
+				snakeY-=1;
+				if (snakeY!=-1) {
+					serpente[snakeX][snakeY]=true;
+					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+					campo[snakeX][snakeY].setGraphic(immagineOcchiAlto);
+				}
+			}
+			if (basso && !alto) {
+				snakeY+=1;
+				if(snakeY!=grandezza) {
+					serpente[snakeX][snakeY]=true;
+					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+					campo[snakeX][snakeY].setGraphic(immagineOcchiBasso);
+				}
+			}
+			if (sinistra && !destra) {
+				snakeX-=1;
+				if(snakeX!=-1) {
+					serpente[snakeX][snakeY]=true;
+					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+					campo[snakeX][snakeY].setGraphic(immagineOcchiSinistra);
+				}
+			}
+			if (destra && !sinistra) {
+				snakeX+=1;
+				if(snakeX!=grandezza) {
+					serpente[snakeX][snakeY]=true;
+					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
+					campo[snakeX][snakeY].setGraphic(immagineOcchiDestra);
+				}
 			}
 		}
-		
-		}
 		//sconfitta
-				if(snakeY==grandezza || snakeY==-1 || snakeX==grandezza || snakeX==-1) {
-					timeline.stop();
-					schermataSconfitta();
-				}
-				//sconfitta suicidio
-				if(uccidiSerpente[snakeX][snakeY]>1) {
-					timeline.stop();
-					schermataSconfitta();
-	}
-		
+		if(snakeY==grandezza || snakeY==-1 || snakeX==grandezza || snakeX==-1) {
+			timeline.stop();
+			schermataSconfitta();
+			musica.stop();
+			sconfitta.play();
+		}
+		//sconfitta suicidio
+		if(uccidiSerpente[snakeX][snakeY]>1) {
+			timeline.stop();
+			musica.stop();
+			sconfitta.play();
+			sconfitta.setCycleCount(AudioClip.INDEFINITE);
+			schermataSconfitta();
+		}
 	}
 	private void pigiato(KeyEvent evento) {
 		if(tastiPremibili==true) {
-		boolean blockW=false;
-		boolean blockA=false;
-		boolean blockS=false;
-		boolean blockD=false;
-		for(int y=0; y<uccidiSerpente.length; y++) {
-			for(int x=0; x<uccidiSerpente.length; x++) {
-				if(uccidiSerpente[x][y]==1) {
-					if(x==snakeX && y<snakeY) {
-						blockW=true;
-					}
-					if(x<snakeX && y==snakeY) {
-						blockA=true;
-					}
-					if(x==snakeX && y>snakeY) {
-						blockS=true;
-					}
-					if(x>snakeX && y==snakeY) {
-						blockD=true;
+			boolean blockW=false;
+			boolean blockA=false;
+			boolean blockS=false;
+			boolean blockD=false;
+			for(int y=0; y<uccidiSerpente.length; y++) {
+				for(int x=0; x<uccidiSerpente.length; x++) {
+					if(uccidiSerpente[x][y]==1) {
+						if(x==snakeX && y<snakeY) {
+							blockW=true;
+						}
+						if(x<snakeX && y==snakeY) {
+							blockA=true;
+						}
+						if(x==snakeX && y>snakeY) {
+							blockS=true;
+						}
+						if(x>snakeX && y==snakeY) {
+							blockD=true;
+						}
 					}
 				}
 			}
-		}
-		
-		if(!blockW &&(evento.getText().equals("w") || evento.getText().equals("W") || evento.getCode() == KeyCode.UP)) {
-			alto=true;
-			basso=false;
-			sinistra=false;
-			destra=false;
-		}
-		if(!blockA &&(evento.getText().equals("a") || evento.getText().equals("A") || evento.getCode() == KeyCode.LEFT)) {
-			alto=false;
-			basso=false;
-			sinistra=true;
-			destra=false;
-		}
-		if(!blockS &&(evento.getText().equals("s") || evento.getText().equals("S") || evento.getCode() == KeyCode.DOWN)) {
-			alto=false;
-			basso=true;
-			sinistra=false;
-			destra=false;
-		}
-		if(!blockD &&(evento.getText().equals("d") || evento.getText().equals("D") || evento.getCode() == KeyCode.RIGHT)) {
-			alto=false;
-			basso=false;
-			sinistra=false;
-			destra=true;
+			if(!blockW &&(evento.getText().equals("w") || evento.getText().equals("W") || evento.getCode() == KeyCode.UP)) {
+				alto=true;
+				basso=false;
+				sinistra=false;
+				destra=false;
+			}
+			if(!blockA &&(evento.getText().equals("a") || evento.getText().equals("A") || evento.getCode() == KeyCode.LEFT)) {
+				alto=false;
+				basso=false;
+				sinistra=true;
+				destra=false;
+			}
+			if(!blockS &&(evento.getText().equals("s") || evento.getText().equals("S") || evento.getCode() == KeyCode.DOWN)) {
+				alto=false;
+				basso=true;
+				sinistra=false;
+				destra=false;
+			}
+			if(!blockD &&(evento.getText().equals("d") || evento.getText().equals("D") || evento.getCode() == KeyCode.RIGHT)) {
+				alto=false;
+				basso=false;
+				sinistra=false;
+				destra=true;
+			}
 		}
 		if(evento.getText().equals("e") || evento.getText().equals("E")) {
-			musica.stop();
-		}
+			if(eVolume.getGraphic()==immagineVolume) {
+				eVolume.setGraphic(immagineVolumeMutato);
+				musica.stop();
+			} else {
+				eVolume.setGraphic(immagineVolume);
+				musica.play();
+			}
 		}
 	}
 	private void schermataSconfitta() {
@@ -561,7 +588,6 @@ public class Snake extends Application {
 				campo[x][y].setVisible(false);
 			}
 		}
-		pannello.setVisible(true);
 		eSconfitta.setVisible(true);
 		bRigioca.setVisible(true);
 
