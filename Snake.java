@@ -25,18 +25,15 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-//TODO schermata di vittoria e sconfitta
-//TODO menù principale e personalizzazione
+//TODO ridimensionare le scritte di vittoria e sconfitta
 //TODO controllare se si può ottimizzare effetto pacman
 //TODO trovare modo di abbassare il volume invece di fare ripartire la musica
-//TODO aggiungi i commenti
-//TODO indentare bene
+//TODO aggiungi i commenti, aggiungere i valori final e indentare bene
 //TODO sistemare gli sfondi
-//TODO aggiungere istruzioni
-//TODO aggiungere quadrato
-//TODO controllare la musica
+//TODO controllare la musica, la musica si ferma quando si perde ma non riparte nonostante play sia su true
+//TODO sostituire i +1 con grandezzaY e rendere grandezza X quello più grande per sistemare lo spazio 
+//TODO fixare bug vittoria e sconfitta insieme, provare metodo attuale e provare a mettere la vittoria dopo il movimento
 public class Snake extends Application {
-
 	int coloreR=(int)(Math.random()*220)+20;	;
 	int coloreB=(int)(Math.random()*220)+20;
 	Boolean rBoolean=true;
@@ -48,13 +45,27 @@ public class Snake extends Application {
 	GridPane griglia = new GridPane();
 	Pane pannello = new Pane();
 	Label eTitolo = new Label("Snake");
-	Button bInizia = new Button("inizia");
-	Label ePunteggio = new Label("punti: "+punti);
+	Button bGioca = new Button("Gioca");
+	Label ePunteggio = new Label();
 	Label eSconfitta = new Label("GAME OVER");
+	Label eVittoria = new Label("HAI VINTO");
 	Button bRigioca = new Button("rigioca");
 	Label eVolume = new Label();
 	Label eVelocità = new Label("velocità serpente");
 	Label eGrandezza = new Label("grandezza campo");
+	Button bComandi = new Button("comandi");
+	Button bMenu = new Button("menu");
+	Label eComandiW = new Label("W: Muovi il serpente su");
+	Label eComandiA = new Label("A: Muovi il serpente a sinistra");
+	Label eComandiS = new Label("S: Muovi il serpente giù");
+	Label eComandiD = new Label("D: Muovi il serpente a destra");
+	Label eComandiE = new Label("E: Muta o riattiva i suoni");
+	Label eRegole = new Label("Come si gioca: L'obbiettivo del gioco è mangiare le mele\n"
+			+ "per far crescere il serpente, fino ad occupare tutta la\n"
+			+ "mappa, attento a non sbattere contro te stesso o contro\n"
+			+ "i muri, in caso avessi difficoltà puoi provare la modalità\n"
+			+ "pacman nella quale andando contro un muro ti ritroverai\n"
+			+ "dal lato opposto della mappa!");
 	Boolean mele[][];
 	Boolean serpente[][];
 	Label campo[][];
@@ -112,12 +123,12 @@ public class Snake extends Application {
 
 	boolean volume= true;
 
-	Region rettangolo= new Region();
+	Region rettangoloMenu= new Region();
+	Region rettangoloComandi= new Region();
 
 	int dimensioneCampo=grandezza*30;
 	Label eSfondo = new Label();
 	final AudioClip musica= new AudioClip(getClass().getResource("Snake.io Music.mp3").toString());
-//	final AudioClip melaMangiata= new AudioClip(getClass().getResource("gulp gulp gulp gulp sound effect.mp3").toString());
 	final AudioClip melaMangiata= new AudioClip(getClass().getResource("apple-bite.mp3").toString());
 	final AudioClip vittoria= new AudioClip(getClass().getResource("suono-vittoria.mp3").toString());
 	final AudioClip sconfitta= new AudioClip(getClass().getResource("suono-sconfitta.mp3").toString());
@@ -126,11 +137,9 @@ public class Snake extends Application {
 
 	public void start(Stage finestra) {
 		musica.setVolume(40);
-				musica.play();
+		//				musica.play();
 		musica.setCycleCount(AudioClip.INDEFINITE);
 		eVolume.setGraphic(immagineVolume);
-		//		immagineSfondo.setFitHeight(dimensioneCampo);
-		//		immagineSfondo.setFitWidth(dimensioneCampo);
 		pannello.getChildren().add(eSfondo);
 		eSfondo.setGraphic(immagineSfondoMedio);
 		immagineSfondoMedio.setPreserveRatio(true);
@@ -151,13 +160,12 @@ public class Snake extends Application {
 		immagineVolumeMutato.setPreserveRatio(true);
 
 		finestraRidimensionata=finestra;
-		eTitolo.setAlignment(Pos.CENTER);
 
-		pannello.setPrefSize(dimensioneCampo, dimensioneCampo);
+		pannello.setPrefSize(dimensioneCampo, dimensioneCampo+80);
 		pannello.getChildren().add(eTitolo);
 		pannello.getChildren().add(griglia);
-		pannello.getChildren().add(bInizia);
-		pannello.getChildren().add(rettangolo);
+		pannello.getChildren().add(bGioca);
+		pannello.getChildren().add(rettangoloMenu);
 		pannello.getChildren().add(eVelocità);
 		pannello.getChildren().add(sVelocità);
 		pannello.getChildren().add(eGrandezza);
@@ -165,53 +173,79 @@ public class Snake extends Application {
 		pannello.getChildren().add(cPacman);
 		pannello.getChildren().add(ePunteggio);
 		pannello.getChildren().add(eSconfitta);
+		pannello.getChildren().add(eVittoria);
 		pannello.getChildren().add(bRigioca);
 		pannello.getChildren().add(eVolume);
-		
+		pannello.getChildren().add(bComandi);
+		pannello.getChildren().add(rettangoloComandi);
+		pannello.getChildren().add(bMenu);
+		pannello.getChildren().add(eComandiW);
+		pannello.getChildren().add(eComandiA);
+		pannello.getChildren().add(eComandiS);
+		pannello.getChildren().add(eComandiD);
+		pannello.getChildren().add(eComandiE);
+		pannello.getChildren().add(eRegole);
+
 		ePunteggio.setVisible(false);
 		eSconfitta.setVisible(false);
+		eVittoria.setVisible(false);
 		bRigioca.setVisible(false);
+		bMenu.setVisible(false);
+		rettangoloComandi.setVisible(false);
+		eComandiW.setVisible(false);
+		eComandiA.setVisible(false);
+		eComandiS.setVisible(false);
+		eComandiD.setVisible(false);
+		eComandiE.setVisible(false);
+		eRegole.setVisible(false);
 
 		griglia.setLayoutY(50);
 
-		eTitolo.setPrefWidth(130);
-		eTitolo.setLayoutX(dimensioneCampo/2-65);
+		eTitolo.setPrefWidth(220);
+		eTitolo.setLayoutX(dimensioneCampo/2-110);
 		eTitolo.setLayoutY(60);
 
-		bInizia.setPrefWidth(130);
-		bInizia.setPrefHeight(40);
-		bInizia.setLayoutX(dimensioneCampo/2-65);
-		bInizia.setLayoutY(120);
+		bGioca.setPrefWidth(180);
+		bGioca.setPrefHeight(40);
+		bGioca.setLayoutX(dimensioneCampo/2-90);
+		bGioca.setLayoutY(140);
 
 		eVelocità.setPrefWidth(130);
 		eVelocità.setLayoutX(dimensioneCampo/2-65);
-		eVelocità.setLayoutY(180);
-		
+		eVelocità.setLayoutY(200);
+
 		sVelocità.setPrefWidth(130);
 		sVelocità.setLayoutX(dimensioneCampo/2-65);
-		sVelocità.setLayoutY(210);
+		sVelocità.setLayoutY(230);
 
 		eGrandezza.setPrefWidth(130);
 		eGrandezza.setLayoutX(dimensioneCampo/2-65);
-		eGrandezza.setLayoutY(240);
-		
+		eGrandezza.setLayoutY(260);
+
 		sGrandezza.setPrefWidth(130);
 		sGrandezza.setLayoutX(dimensioneCampo/2-65);
-		sGrandezza.setLayoutY(270);
+		sGrandezza.setLayoutY(290);
 
 		cPacman.setLayoutX(dimensioneCampo/2-65);
-		cPacman.setLayoutY(310);
+		cPacman.setLayoutY(335);
 
 		eVolume.setLayoutX(dimensioneCampo-45);
 		eVolume.setLayoutY(5);
-		
-		rettangolo.setLayoutX(dimensioneCampo/2-85);
-		rettangolo.setLayoutY(180);
-		rettangolo.setPrefWidth(170);
-		rettangolo.setPrefHeight(180);
-		rettangolo.setOpacity(0.3);
-		rettangolo.getStyleClass().add("rettangolo");
-		
+
+		rettangoloMenu.setPrefWidth(170);
+		rettangoloMenu.setPrefHeight(240);
+		rettangoloMenu.setLayoutX(dimensioneCampo/2-85);
+		rettangoloMenu.setLayoutY(190);
+		rettangoloMenu.setOpacity(0.4);
+		rettangoloMenu.getStyleClass().add("rettangolo");
+
+		rettangoloComandi.setPrefWidth(400);
+		rettangoloComandi.setPrefHeight(300);
+		rettangoloComandi.setLayoutX(dimensioneCampo/2-200);
+		rettangoloComandi.setLayoutY(60);
+		rettangoloComandi.setOpacity(0.4);
+		rettangoloComandi.getStyleClass().add("rettangolo");
+
 		sVelocità.setShowTickMarks(true);
 		sVelocità.setShowTickLabels(true);
 		sVelocità.setSnapToTicks(true);
@@ -224,28 +258,91 @@ public class Snake extends Application {
 		sGrandezza.setMinorTickCount(0);
 		sGrandezza.setMajorTickUnit(1);
 
+		ePunteggio.setLayoutX(5);
+		ePunteggio.setLayoutY(5);
 
-		
-		Font fontTitolo = Font.loadFont(getClass().getResource("retro_computer_personal_use.ttf").toString(), 30);
-		Font fontTesto = Font.loadFont(getClass().getResource("Minecraft.ttf").toString(), 15);
+		bComandi.setPrefWidth(130);
+		bComandi.setPrefHeight(40);
+		bComandi.setLayoutX(dimensioneCampo/2-65);
+		bComandi.setLayoutY(375);
+
+		bMenu.setPrefWidth(130);
+		bMenu.setPrefHeight(40);
+		bMenu.setLayoutX(dimensioneCampo/2-65);
+		bMenu.setLayoutY(375);
+
+		eComandiW.setPrefWidth(380);
+		eComandiW.setPrefHeight(40);
+		eComandiW.setLayoutX(dimensioneCampo/2-190);
+		eComandiW.setLayoutY(60);
+
+		eComandiA.setPrefWidth(380);
+		eComandiA.setPrefHeight(40);
+		eComandiA.setLayoutX(dimensioneCampo/2-190);
+		eComandiA.setLayoutY(90);
+
+		eComandiS.setPrefWidth(380);
+		eComandiS.setPrefHeight(40);
+		eComandiS.setLayoutX(dimensioneCampo/2-190);
+		eComandiS.setLayoutY(120);
+
+		eComandiD.setPrefWidth(380);
+		eComandiD.setPrefHeight(40);
+		eComandiD.setLayoutX(dimensioneCampo/2-190);
+		eComandiD.setLayoutY(150);
+
+		eComandiE.setPrefWidth(380);
+		eComandiE.setPrefHeight(40);
+		eComandiE.setLayoutX(dimensioneCampo/2-190);
+		eComandiE.setLayoutY(180);
+
+		eRegole.setPrefWidth(380);
+		eRegole.setPrefHeight(130);
+		eRegole.setLayoutX(dimensioneCampo/2-190);
+		eRegole.setLayoutY(210);
+
+		Font fontTitolo = Font.loadFont(getClass().getResource("retro_computer_personal_use.ttf").toString(), 50);
+		Font fontTesto = Font.loadFont(getClass().getResource("pixellari.ttf").toString(), 15);
+		Font fontPunti = Font.loadFont(getClass().getResource("retro_computer_personal_use.ttf").toString(), 25);
+
 		eTitolo.setFont(fontTitolo);
-		ePunteggio.setFont(fontTesto);
+		eSconfitta.setFont(fontTitolo);
+		eVittoria.setFont(fontTitolo);
+		ePunteggio.setFont(fontPunti);
+		bGioca.setFont(fontTesto);
+		eVelocità.setFont(fontTesto);
+		eGrandezza.setFont(fontTesto);
 		cPacman.setFont(fontTesto);
-		
+		bMenu.setFont(fontTesto);
+		bComandi.setFont(fontTesto);
+		bRigioca.setFont(fontTesto);
+
+		eComandiW.setFont(fontTesto);
+		eComandiA.setFont(fontTesto);
+		eComandiS.setFont(fontTesto);
+		eComandiD.setFont(fontTesto);
+		eComandiE.setFont(fontTesto);
+		eRegole.setFont(fontTesto);
+
 		DropShadow shadowTitolo = new DropShadow();
 		shadowTitolo.setOffsetY(5.0);
 		shadowTitolo.setColor(Color.WHITE);
-		DropShadow shadowTesto = new DropShadow();
-		shadowTesto.setOffsetY(1.0);
-		shadowTesto.setColor(Color.DARKGOLDENROD);
 		eTitolo.setEffect(shadowTitolo);
+		DropShadow shadowTesto = new DropShadow();
+		shadowTesto.setOffsetY(2.0);
+		shadowTesto.setColor(Color.YELLOW);
 		ePunteggio.setEffect(shadowTesto);
-		eSconfitta.setEffect(shadowTesto);
+		eVittoria.setEffect(shadowTesto);
+		DropShadow shadowSconfitta = new DropShadow();
+		shadowSconfitta.setOffsetY(5.0);
+		shadowSconfitta.setColor(Color.RED);
+		eSconfitta.setEffect(shadowSconfitta);
 
-		bInizia.setOnAction(e-> inizia());
-		bRigioca.setOnAction(e-> inizia());
+		bGioca.setOnAction(e-> iniziaPartita());
+		bRigioca.setOnAction(e-> iniziaPartita());
+		bComandi.setOnAction(e-> comandi());
+		bMenu.setOnAction(e-> menu());
 
-		griglia.setGridLinesVisible(true);
 		pannello.getStylesheets().add("it/edu/iisgubbio/gioco/Snake.css");
 		Scene scena = new Scene(pannello);
 		finestra.setTitle("Snake");
@@ -253,19 +350,79 @@ public class Snake extends Application {
 		scena.setOnKeyPressed(e -> pigiato(e));
 		finestra.show();
 	}
-	public void inizia() {
-		sconfitta.stop();
-		
-		tastiPremibili=true;
-		bInizia.setVisible(false);
+	public void menu() {
+		grandezza=15;
+		dimensioneCampo=grandezza*30;
+		pannello.setPrefSize(dimensioneCampo, dimensioneCampo+80);
+		eVolume.setLayoutX(dimensioneCampo-45);
+		finestraRidimensionata.sizeToScene();
+		ePunteggio.setVisible(false);
+		eSconfitta.setVisible(false);
+		eVittoria.setVisible(false);
+		bRigioca.setVisible(false);
+		bMenu.setVisible(false);
+		rettangoloComandi.setVisible(false);
+		eComandiW.setVisible(false);
+		eComandiA.setVisible(false);
+		eComandiS.setVisible(false);
+		eComandiD.setVisible(false);
+		eComandiE.setVisible(false);
+		eRegole.setVisible(false);
+
+		bGioca.setVisible(true);
+		eTitolo.setVisible(true);
+		eVelocità.setVisible(true);
+		sVelocità.setVisible(true);
+		eGrandezza.setVisible(true);
+		sGrandezza.setVisible(true);
+		cPacman.setVisible(true);
+		rettangoloMenu.setVisible(true);
+		bGioca.setVisible(true);
+		bComandi.setVisible(true);
+	}
+	public void comandi() {
+		bGioca.setVisible(false);
 		eTitolo.setVisible(false);
+		eVelocità.setVisible(false);
 		sVelocità.setVisible(false);
+		eGrandezza.setVisible(false);
 		sGrandezza.setVisible(false);
 		cPacman.setVisible(false);
-		ePunteggio.setVisible(true);
-		eSconfitta.setVisible(false);
-		bRigioca.setVisible(false);
+		rettangoloMenu.setVisible(false);
+		bGioca.setVisible(false);
+		bComandi.setVisible(false);
 
+		bMenu.setVisible(true);
+		rettangoloComandi.setVisible(true);
+		eComandiW.setVisible(true);
+		eComandiA.setVisible(true);
+		eComandiS.setVisible(true);
+		eComandiD.setVisible(true);
+		eComandiE.setVisible(true);
+		eRegole.setVisible(true);
+
+		bMenu.setLayoutX(dimensioneCampo/2-65);
+		bMenu.setLayoutY(375);
+	}
+	public void iniziaPartita() {
+		sconfitta.stop();
+		tastiPremibili=true;
+		ePunteggio.setText("punti: "+ punti);
+
+		bGioca.setVisible(false);
+		eTitolo.setVisible(false);
+		eVelocità.setVisible(false);
+		sVelocità.setVisible(false);
+		eGrandezza.setVisible(false);
+		sGrandezza.setVisible(false);
+		cPacman.setVisible(false);
+		rettangoloMenu.setVisible(false);
+		eSconfitta.setVisible(false);
+		eVittoria.setVisible(false);
+		bRigioca.setVisible(false);
+		bComandi.setVisible(false);
+		bMenu.setVisible(false);
+		ePunteggio.setVisible(true);
 		//velocità gioco
 		int sliderV = (int) sVelocità.getValue();
 		switch (sliderV) {
@@ -284,7 +441,6 @@ public class Snake extends Application {
 				x -> aggiornaTimer()));
 		timeline.setCycleCount(Animation.INDEFINITE);
 		timeline.play();
-
 		//grandezza campo
 		int sliderG = (int) sGrandezza.getValue();
 		switch (sliderG) {
@@ -301,28 +457,34 @@ public class Snake extends Application {
 			//			eSfondo.setGraphic(immagineSfondoMedio);
 			break;
 		case 3:
-			grandezza=30;
+			grandezza=19;
 			snakeX=3;
-			snakeY=14;
+			snakeY=9;
 			//			eSfondo.setGraphic(immagineSfondoMaxi);
 			break;
 		}
-		mele = new Boolean [grandezza][grandezza];
-		serpente = new Boolean [grandezza][grandezza];
-		campo = new Label [grandezza][grandezza];
-		uccidiSerpente = new int [grandezza][grandezza];
+		mele = new Boolean [grandezza][grandezza+1];
+		serpente = new Boolean [grandezza][grandezza+1];
+		campo = new Label [grandezza][grandezza+1];
+		uccidiSerpente = new int [grandezza][grandezza+1];
+
 		dimensioneCampo=grandezza*30;
-		pannello.setPrefSize(dimensioneCampo, dimensioneCampo+50);
+		pannello.setPrefSize(dimensioneCampo, dimensioneCampo+80);
 		finestraRidimensionata.sizeToScene();
 
-		eSconfitta.setPrefWidth(130);
-		eSconfitta.setLayoutX(dimensioneCampo/2-65);
-		eSconfitta.setLayoutY(dimensioneCampo/2);
+		eSconfitta.setPrefWidth(360);
+		eSconfitta.setLayoutX(dimensioneCampo/2-180);
+		eSconfitta.setLayoutY(dimensioneCampo/2-60);
+
+		eVittoria.setPrefWidth(360);
+		eVittoria.setLayoutX(dimensioneCampo/2-180);
+		eVittoria.setLayoutY(dimensioneCampo/2-60);
 
 		bRigioca.setPrefWidth(130);
+		bRigioca.setPrefHeight(40);
 		bRigioca.setLayoutX(dimensioneCampo/2-65);
 		bRigioca.setLayoutY(dimensioneCampo/2+30);
-		
+
 		eVolume.setLayoutX(dimensioneCampo-45);
 		eVolume.setLayoutY(5);
 		//effetto pacman
@@ -331,9 +493,8 @@ public class Snake extends Application {
 		}else {
 			pacman=false;
 		}
-
 		//crea il campo e lo colora
-		for(int y=0; y<campo.length;y++) {
+		for(int y=0; y<campo.length+1;y++) {
 			for(int x=0; x<campo.length;x++) {
 				campo[x][y]= new Label();
 				griglia.add(campo[x][y], x, y);
@@ -350,19 +511,19 @@ public class Snake extends Application {
 			}
 		}
 		//crea la griglia del serpente
-		for(int y=0; y<serpente.length;y++) {
+		for(int y=0; y<serpente.length+1;y++) {
 			for(int x=0; x<serpente.length;x++) {
 				serpente[x][y]= false;
 			}
 		}
 		//crea la griglia delle mele
-		for(int y=0; y<mele.length;y++) {
+		for(int y=0; y<mele.length+1;y++) {
 			for(int x=0; x<mele.length;x++) {
 				mele[x][y]= false;
 			}
 		}
 		//crea la griglia uccidiserpente
-		for(int y=0; y<mele.length;y++) {
+		for(int y=0; y<mele.length+1;y++) {
 			for(int x=0; x<mele.length;x++) {
 				uccidiSerpente[x][y]=0;
 			}
@@ -375,7 +536,6 @@ public class Snake extends Application {
 		int codaX=0;
 		int codaY=0;
 		int coda=0;
-
 		//cambio colore serpente
 		if(rBoolean) {
 			coloreR+=20;
@@ -388,7 +548,6 @@ public class Snake extends Application {
 			if (coloreR<=20)
 				rBoolean=true;
 		}
-
 		if(bBoolean) {
 			coloreB+=20;
 		} else {
@@ -405,11 +564,10 @@ public class Snake extends Application {
 		if (mele[snakeX][snakeY]) {
 			mele[snakeX][snakeY] = false;
 			melaMangiata.play();
-
 			int meleLibere[];
 			int i=0;
-			meleLibere =new int[grandezza*grandezza];
-			for(int y=0; y<mele.length;y++) {
+			meleLibere =new int[grandezza*(grandezza+1)];
+			for(int y=0; y<mele.length+1;y++) {
 				for(int x=0; x<mele.length;x++) {
 					if(serpente[x][y]==false) {
 						meleLibere[i]=x*100+y;
@@ -426,11 +584,9 @@ public class Snake extends Application {
 			campo[snakeX][snakeY].setGraphic(null);
 			punti+=1;
 			ePunteggio.setText("punti: "+ punti);
-
-
 		}else {
 			//coda del serpente
-			for(int y=0; y<mele.length;y++) {
+			for(int y=0; y<mele.length+1;y++) {
 				for(int x=0; x<mele.length;x++) {
 					if(serpente[x][y]==true) {
 						if(uccidiSerpente[x][y]>coda) {
@@ -446,29 +602,30 @@ public class Snake extends Application {
 			uccidiSerpente[codaX][codaY]=0;
 		}
 		//aumento griglia della coda
-		for(int y=0; y<mele.length;y++) {
+		for(int y=0; y<mele.length+1;y++) {
 			for(int x=0; x<mele.length;x++) {
 				if
 				(serpente[x][y]==true) {
 					uccidiSerpente[x][y]+=1;
-					//					debug
-					//					campo[x][y].setText(uccidiSerpente[x][y]+"");
 					campo[snakeX][snakeY].setGraphic(null);
 				}
 			}
 		}
+		
 		//vittoria
-		if(punti==(grandezza*grandezza)-2) {
+		boolean bloccaMorte=false;
+		if(punti==grandezza*(grandezza+1)-2) {
 			timeline.stop();
 			vittoria.play();
-			//			schermataVittoria();
+			schermataVittoria();
+			bloccaMorte=true;
 		}
 		//movimento
 		if(pacman) {
 			if (alto && !basso) {
 				snakeY-=1;
 				if (snakeY==-1) {
-					snakeY=grandezza-1;
+					snakeY=grandezza;
 				}
 				serpente[snakeX][snakeY]=true;
 				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
@@ -476,15 +633,13 @@ public class Snake extends Application {
 			}
 			if (basso && !alto) {
 				snakeY+=1;
-				if(snakeY==grandezza) {
+				if(snakeY==grandezza+1) {
 					snakeY=0;
 				}
-
 				serpente[snakeX][snakeY]=true;
 				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
 				campo[snakeX][snakeY].setGraphic(immagineOcchiBasso);
 			}
-
 			if (sinistra && !destra) {
 				snakeX-=1;
 				if(snakeX==-1) {
@@ -493,7 +648,6 @@ public class Snake extends Application {
 				serpente[snakeX][snakeY]=true;
 				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
 				campo[snakeX][snakeY].setGraphic(immagineOcchiSinistra);
-
 			}
 			if (destra && !sinistra) {
 				snakeX+=1;
@@ -503,7 +657,6 @@ public class Snake extends Application {
 				serpente[snakeX][snakeY]=true;
 				campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
 				campo[snakeX][snakeY].setGraphic(immagineOcchiDestra);
-
 			}
 		}else {
 			if (alto && !basso) {
@@ -516,7 +669,7 @@ public class Snake extends Application {
 			}
 			if (basso && !alto) {
 				snakeY+=1;
-				if(snakeY!=grandezza) {
+				if(snakeY!=grandezza+1) {
 					serpente[snakeX][snakeY]=true;
 					campo[snakeX][snakeY].setStyle("-fx-background-color:rgb("+coloreR+", 0, "+coloreB+")");
 					campo[snakeX][snakeY].setGraphic(immagineOcchiBasso);
@@ -539,20 +692,22 @@ public class Snake extends Application {
 				}
 			}
 		}
-		//sconfitta
-		if(snakeY==grandezza || snakeY==-1 || snakeX==grandezza || snakeX==-1) {
-			timeline.stop();
-			schermataSconfitta();
-			musica.stop();
-			sconfitta.play();
-		}
-		//sconfitta suicidio
-		if(uccidiSerpente[snakeX][snakeY]>1) {
-			timeline.stop();
-			musica.stop();
-			sconfitta.play();
-			sconfitta.setCycleCount(AudioClip.INDEFINITE);
-			schermataSconfitta();
+		if(!bloccaMorte) {
+			//sconfitta
+			if(snakeY==grandezza+1 || snakeY==-1 || snakeX==grandezza || snakeX==-1) {
+				timeline.stop();
+				schermataSconfitta();
+				musica.stop();
+				//			sconfitta.play();
+			}
+			//sconfitta suicidio
+			if(uccidiSerpente[snakeX][snakeY]>1) {
+				timeline.stop();
+				musica.stop();
+				//			sconfitta.play();
+				sconfitta.setCycleCount(AudioClip.INDEFINITE);
+				schermataSconfitta();
+			}
 		}
 	}
 	private void pigiato(KeyEvent evento) {
@@ -561,7 +716,7 @@ public class Snake extends Application {
 			boolean blockA=false;
 			boolean blockS=false;
 			boolean blockD=false;
-			for(int y=0; y<uccidiSerpente.length; y++) {
+			for(int y=0; y<uccidiSerpente.length+1; y++) {
 				for(int x=0; x<uccidiSerpente.length; x++) {
 					if(uccidiSerpente[x][y]==1) {
 						if(x==snakeX && y<snakeY) {
@@ -615,16 +770,37 @@ public class Snake extends Application {
 		}
 	}
 	private void schermataSconfitta() {
-		for(int y=0; y<campo.length;y++) {
+		for(int y=0; y<campo.length+1;y++) {
 			for(int x=0; x<campo.length;x++) {
 				campo[x][y].setVisible(false);
 			}
 		}
 		eSconfitta.setVisible(true);
 		bRigioca.setVisible(true);
-
+		bMenu.setVisible(true);
+		bMenu.setLayoutX(dimensioneCampo/2-65);
+		bMenu.setLayoutY(dimensioneCampo/2+80);
 		snakeX=2;
-		snakeY=grandezza/2;
+		snakeY=grandezza+1/2;
+		punti=0;
+		alto=false;
+		basso=false;
+		sinistra=false;
+		destra=true;
+	}
+	private void schermataVittoria() {
+		for(int y=0; y<campo.length+1;y++) {
+			for(int x=0; x<campo.length;x++) {
+				campo[x][y].setVisible(false);
+			}
+		}
+		eVittoria.setVisible(true);
+		bRigioca.setVisible(true);
+		bMenu.setVisible(true);
+		bMenu.setLayoutX(dimensioneCampo/2-65);
+		bMenu.setLayoutY(dimensioneCampo/2+80);
+		snakeX=2;
+		snakeY=grandezza+1/2;
 		punti=0;
 		alto=false;
 		basso=false;
