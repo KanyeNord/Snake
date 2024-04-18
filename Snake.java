@@ -17,8 +17,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -30,6 +32,9 @@ import javafx.util.Duration;
 //TODO aggiungi i commenti
 //TODO indentare bene
 //TODO sistemare gli sfondi
+//TODO aggiungere istruzioni
+//TODO aggiungere quadrato
+//TODO controllare la musica
 public class Snake extends Application {
 
 	int coloreR=(int)(Math.random()*220)+20;	;
@@ -47,7 +52,9 @@ public class Snake extends Application {
 	Label ePunteggio = new Label("punti: "+punti);
 	Label eSconfitta = new Label("GAME OVER");
 	Button bRigioca = new Button("rigioca");
-	Label eVolume = new Label("cds");
+	Label eVolume = new Label();
+	Label eVelocità = new Label("velocità serpente");
+	Label eGrandezza = new Label("grandezza campo");
 	Boolean mele[][];
 	Boolean serpente[][];
 	Label campo[][];
@@ -105,12 +112,12 @@ public class Snake extends Application {
 
 	boolean volume= true;
 
-
+	Region rettangolo= new Region();
 
 	int dimensioneCampo=grandezza*30;
 	Label eSfondo = new Label();
 	final AudioClip musica= new AudioClip(getClass().getResource("Snake.io Music.mp3").toString());
-	//	final AudioClip melaMangiata= new AudioClip(getClass().getResource("gulp gulp gulp gulp sound effect.mp3").toString());
+//	final AudioClip melaMangiata= new AudioClip(getClass().getResource("gulp gulp gulp gulp sound effect.mp3").toString());
 	final AudioClip melaMangiata= new AudioClip(getClass().getResource("apple-bite.mp3").toString());
 	final AudioClip vittoria= new AudioClip(getClass().getResource("suono-vittoria.mp3").toString());
 	final AudioClip sconfitta= new AudioClip(getClass().getResource("suono-sconfitta.mp3").toString());
@@ -119,7 +126,7 @@ public class Snake extends Application {
 
 	public void start(Stage finestra) {
 		musica.setVolume(40);
-		//		musica.play();
+				musica.play();
 		musica.setCycleCount(AudioClip.INDEFINITE);
 		eVolume.setGraphic(immagineVolume);
 		//		immagineSfondo.setFitHeight(dimensioneCampo);
@@ -146,18 +153,21 @@ public class Snake extends Application {
 		finestraRidimensionata=finestra;
 		eTitolo.setAlignment(Pos.CENTER);
 
-
 		pannello.setPrefSize(dimensioneCampo, dimensioneCampo);
 		pannello.getChildren().add(eTitolo);
 		pannello.getChildren().add(griglia);
 		pannello.getChildren().add(bInizia);
+		pannello.getChildren().add(rettangolo);
+		pannello.getChildren().add(eVelocità);
 		pannello.getChildren().add(sVelocità);
+		pannello.getChildren().add(eGrandezza);
 		pannello.getChildren().add(sGrandezza);
 		pannello.getChildren().add(cPacman);
 		pannello.getChildren().add(ePunteggio);
 		pannello.getChildren().add(eSconfitta);
 		pannello.getChildren().add(bRigioca);
 		pannello.getChildren().add(eVolume);
+		
 		ePunteggio.setVisible(false);
 		eSconfitta.setVisible(false);
 		bRigioca.setVisible(false);
@@ -173,22 +183,35 @@ public class Snake extends Application {
 		bInizia.setLayoutX(dimensioneCampo/2-65);
 		bInizia.setLayoutY(120);
 
+		eVelocità.setPrefWidth(130);
+		eVelocità.setLayoutX(dimensioneCampo/2-65);
+		eVelocità.setLayoutY(180);
+		
 		sVelocità.setPrefWidth(130);
 		sVelocità.setLayoutX(dimensioneCampo/2-65);
 		sVelocità.setLayoutY(210);
 
+		eGrandezza.setPrefWidth(130);
+		eGrandezza.setLayoutX(dimensioneCampo/2-65);
+		eGrandezza.setLayoutY(240);
+		
 		sGrandezza.setPrefWidth(130);
 		sGrandezza.setLayoutX(dimensioneCampo/2-65);
-		sGrandezza.setLayoutY(250);
+		sGrandezza.setLayoutY(270);
 
 		cPacman.setLayoutX(dimensioneCampo/2-65);
-		cPacman.setLayoutY(290);
-
-
+		cPacman.setLayoutY(310);
 
 		eVolume.setLayoutX(dimensioneCampo-45);
 		eVolume.setLayoutY(5);
-
+		
+		rettangolo.setLayoutX(dimensioneCampo/2-85);
+		rettangolo.setLayoutY(180);
+		rettangolo.setPrefWidth(170);
+		rettangolo.setPrefHeight(180);
+		rettangolo.setOpacity(0.3);
+		rettangolo.getStyleClass().add("rettangolo");
+		
 		sVelocità.setShowTickMarks(true);
 		sVelocità.setShowTickLabels(true);
 		sVelocità.setSnapToTicks(true);
@@ -201,10 +224,14 @@ public class Snake extends Application {
 		sGrandezza.setMinorTickCount(0);
 		sGrandezza.setMajorTickUnit(1);
 
-		Font font = Font.loadFont(getClass().getResource("retro_computer_personal_use.ttf").toString(), 30);
-		eTitolo.setFont(font);
-		ePunteggio.setFont(font);
 
+		
+		Font fontTitolo = Font.loadFont(getClass().getResource("retro_computer_personal_use.ttf").toString(), 30);
+		Font fontTesto = Font.loadFont(getClass().getResource("Minecraft.ttf").toString(), 15);
+		eTitolo.setFont(fontTitolo);
+		ePunteggio.setFont(fontTesto);
+		cPacman.setFont(fontTesto);
+		
 		DropShadow shadowTitolo = new DropShadow();
 		shadowTitolo.setOffsetY(5.0);
 		shadowTitolo.setColor(Color.WHITE);
@@ -227,6 +254,8 @@ public class Snake extends Application {
 		finestra.show();
 	}
 	public void inizia() {
+		sconfitta.stop();
+		
 		tastiPremibili=true;
 		bInizia.setVisible(false);
 		eTitolo.setVisible(false);
@@ -293,6 +322,9 @@ public class Snake extends Application {
 		bRigioca.setPrefWidth(130);
 		bRigioca.setLayoutX(dimensioneCampo/2-65);
 		bRigioca.setLayoutY(dimensioneCampo/2+30);
+		
+		eVolume.setLayoutX(dimensioneCampo-45);
+		eVolume.setLayoutY(5);
 		//effetto pacman
 		if( cPacman.isSelected() ) {
 			pacman=true;

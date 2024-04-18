@@ -23,3 +23,7 @@
 	-fx-font-size:70;
 	-fx-font-weight: bold;
 }
+.rettangolo {
+	-fx-background-color: rgb(255, 255, 255);
+	-fx-background-radius:10%;
+}
