@@ -283,7 +283,7 @@ public class Snake extends Application {
 		sGrandezza.setMajorTickUnit(1);
 		//aggiunge un font ai testi
 		Font fontTitolo = Font.loadFont(getClass().getResource("retro_computer_personal_use.ttf").toString(), 50);
-		Font fontTesto = Font.loadFont(getClass().getResource("pixellari.ttf").toString(), 15);
+		Font fontTesto = Font.loadFont(getClass().getResource("Pixellari.ttf").toString(), 15);
 		Font fontPunti = Font.loadFont(getClass().getResource("retro_computer_personal_use.ttf").toString(), 25);
 
 		eTitolo.setFont(fontTitolo);
